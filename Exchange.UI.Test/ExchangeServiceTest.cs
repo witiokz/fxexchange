@@ -46,7 +46,6 @@ namespace Exchange.UI.Test
         [TestMethod]
         public void Test_If_Convertion_From_Default_To_Currency_Returns_Correct_Amount()
         {
-            var expectedAmount = 10;
             var inputItem = new InputItem
             {
                 CurrencyFrom = new CurrencyItem { IsoName = CurrencyIso.DKK },
@@ -68,23 +67,27 @@ namespace Exchange.UI.Test
         [TestMethod]
         public void Test_If_Convertion_From_Currency_To_Currency_Returns_Correct_Amount()
         {
-            var expectedAmount = 1;
+            var itemsAmount = 2;
             var inputItem = new InputItem
             {
                 CurrencyFrom = new CurrencyItem { IsoName = CurrencyIso.EUR },
                 CurrencyTo = new CurrencyItem { IsoName = CurrencyIso.USD },
-                MoneyAmount = 1
+                MoneyAmount = itemsAmount
             };
             var mock = new Mock<IExchangeItemRepository>();
-            mock.Setup(m => m.GetByCurrencies(It.IsAny<CurrencyItem>(), It.IsAny<CurrencyItem>()))
-                .Returns(new ExchangeItem { Amount = 743.94m });
+            mock.Setup(m => m.GetByCurrencies(It.Is<CurrencyItem>(i => i.IsoName == CurrencyIso.EUR),
+                                              It.Is<CurrencyItem>(i => i.IsoName == CurrencyIso.DKK)))
+                .Returns(new ExchangeItem { Amount = 743.94m * itemsAmount });
+            mock.Setup(m => m.GetByCurrencies(It.Is<CurrencyItem>(i => i.IsoName == CurrencyIso.USD),
+                                              It.Is<CurrencyItem>(i => i.IsoName == CurrencyIso.DKK)))
+                .Returns(new ExchangeItem { Amount = 663.11m * itemsAmount });
             mock.Setup(m => m.DefaultCurrency)
                 .Returns(new CurrencyItem { IsoName = CurrencyIso.DKK });
 
             var exchangeService = new ExchangeService(mock.Object);
             var amount = exchangeService.Calculate(inputItem);
 
-            Assert.AreEqual(expectedAmount, amount);
+            Assert.AreEqual(2.2438m, amount);
         }
     }
 }

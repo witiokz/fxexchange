@@ -40,7 +40,7 @@ namespace Exchange.Service
                 {
                     CurrencyFrom = _exchangeItemRepository.DefaultCurrency,
                     CurrencyTo = inputItem.CurrencyTo,
-                    MoneyAmount = currencyFromToDefaultCurrencyAmount ?? 0
+                    MoneyAmount = currencyFromToDefaultCurrencyAmount * inputItem.MoneyAmount ?? 0
                 };
                 return Calculate(inputItem);
             }
